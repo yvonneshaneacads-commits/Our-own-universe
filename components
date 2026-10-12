@@ -1,0 +1,56 @@
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { SidebarNav, BottomNav } from "./section-nav";
+import { StatusBar } from "./status-bar";
+import { useSpace } from "@/hooks/use-space";
+import { wallpaperOption } from "@/lib/mascots";
+
+interface AppShellProps {
+  children: ReactNode;
+  className?: string;
+}
+
+/**
+ * The virtual desktop: a folder rail down the side, a little system bar across
+ * the top, and the illustrated world behind the paper panels. On phones the rail
+ * becomes a touch-friendly bar along the bottom.
+ */
+export function AppShell({ children, className }: AppShellProps) {
+  const { wallpaperKey, wallpaperImage, reduceMotion, me } = useSpace();
+  const wallpaper = wallpaperOption(wallpaperKey);
+
+  return (
+    <div className={cn("flex h-full w-full overflow-hidden bg-desk", reduceMotion && "reduce-motion")}>
+      <SidebarNav />
+
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div aria-hidden className={cn("absolute inset-0", wallpaper.className)} />
+        {wallpaperImage ? (
+          <img
+            src={wallpaperImage}
+            alt=""
+            crossOrigin="anonymous"
+            className="absolute inset-0 h-full w-full object-cover opacity-90"
+          />
+        ) : null}
+        <div aria-hidden className="absolute inset-0 bg-background/55 backdrop-blur-[1px]" />
+
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          <StatusBar />
+
+          <main
+            className={cn(
+              "min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 lg:px-6",
+              me?.prefs?.textScale === "large" && "text-[1.0625rem]",
+              className,
+            )}
+          >
+            <div className="mx-auto w-full max-w-[1500px]">{children}</div>
+          </main>
+
+          <BottomNav />
+        </div>
+      </div>
+    </div>
+  );
+}
